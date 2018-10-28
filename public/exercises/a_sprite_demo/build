@@ -1,4 +1,0 @@
-#!/bin/sh
-nbasic header.bas main.bas common.bas footer.bas -quiet -o a_demo.asm
-nesasm a_demo.asm
-#rm *.asm
