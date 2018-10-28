@@ -9,6 +9,7 @@ router.post('/', (req, res, next) => {
     const data = req.body;
 
     let exerciseFile = req.files.file;
+
     let uploadedZipFile = `${__dirname}/../public/exercises/${req.body.filename}`;
 
     exerciseFile.mv(uploadedZipFile, function(err) {
