@@ -7,7 +7,7 @@ const exerciseSchema = mongoose.Schema({
     exerciseName: String,
     exerciseState: String,
     exerciseDate: Date,
-    exercisePath: String
+    exerciseFolder: String
 });
 
 const Exercise = mongoose.model('Exercise', exerciseSchema);

@@ -9,6 +9,7 @@ router.post('/', (req, res, next) => {
     const data = req.body;
 
     let exerciseFile = req.files.file;
+    let exerciseFolder = req.files.file.name.split('.').slice(0, -1).join('.');
     let uploadedZipFile = `${__dirname}/../public/exercises/${req.body.filename}`;
 
     exerciseFile.mv(uploadedZipFile, function(err) {
@@ -42,7 +43,7 @@ router.post('/', (req, res, next) => {
             });
         });
 
-        data.exercisePath = `${__dirname}/../public/exercises/${req.body.filename}`;
+        data.exerciseFolder = exerciseFolder;
 
         const exercise = new Exercise(data);
 

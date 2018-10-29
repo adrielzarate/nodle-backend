@@ -27,6 +27,7 @@ app.use('/',            require('./routes/index'));
 app.use('/users',       require('./routes/users'));
 app.use('/api/getList', require('./routes/api'));
 app.use('/upload',      require('./routes/upload'));
+app.use('/api',          require('./routes/api'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -41,7 +42,17 @@ app.use(function(err, req, res, next) {
 
     // render the error page
     res.status(err.status || 500);
+    if(isAPI(req)) {
+        res.json({ success: false, error: err.message });
+        return;
+    }
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
     res.render('error');
 });
+
+function isAPI( req ) {
+    return req.originalUrl.indexOf('/api') === 0;
+}
 
 module.exports = app;
