@@ -18,4 +18,11 @@ router.get('/exercise/:exerciseName', async(req, res, next) => {
         .catch((err) => next(err));
 });
 
+router.delete('/exercise/:exerciseName', async(req, res, next) => {
+    Exercise.findOneAndRemove({'exerciseName': req.params.exerciseName})
+        .exec()
+        .then((exercise) => res.json(exercise))
+        .catch((err) => next(err));
+});
+
 module.exports = router;
