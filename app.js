@@ -27,7 +27,8 @@ app.use('/',            require('./routes/index'));
 app.use('/users',       require('./routes/users'));
 app.use('/api/getList', require('./routes/api'));
 app.use('/upload',      require('./routes/upload'));
-app.use('/api',          require('./routes/api'));
+app.use('/exercise',    require('./routes/exercise'));
+app.use('/api',         require('./routes/api'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

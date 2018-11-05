@@ -6,7 +6,7 @@ const exerciseSchema = mongoose.Schema({
     unitName: String,
     exerciseName: String,
     exerciseState: String,
-    exerciseDate: Date,
+    publicationDate: Date,
     exerciseFolder: String
 });
 

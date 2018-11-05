@@ -11,15 +11,15 @@ router.get('/exercises', (req, res, next) => {
         .catch((err) => next(err));
 });
 
-router.get('/exercise/:exerciseName', async(req, res, next) => {
-    Exercise.findOne({'exerciseName': req.params.exerciseName})
+router.get('/exercise/:exerciseFolder', async(req, res, next) => {
+    Exercise.findOne({'exerciseFolder': req.params.exerciseFolder})
         .exec()
         .then((exercise) => res.json(exercise))
         .catch((err) => next(err));
 });
 
-router.delete('/exercise/:exerciseName', async(req, res, next) => {
-    Exercise.findOneAndRemove({'exerciseName': req.params.exerciseName})
+router.delete('/exercise/:exerciseFolder', async(req, res, next) => {
+    Exercise.findOneAndRemove({'exerciseFolder': req.params.exerciseFolder})
         .exec()
         .then((exercise) => res.json(exercise))
         .catch((err) => next(err));

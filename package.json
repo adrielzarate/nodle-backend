@@ -8,17 +8,27 @@
   },
   "dependencies": {
     "adm-zip": "^0.4.11",
+    "async": "^2.6.1",
+    "async-mkdirp": "^1.2.7",
+    "concat": "^1.0.3",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.4",
     "cross-env": "^5.2.0",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "express-fileupload": "^1.0.0",
+    "html-extractor": "^0.2.2",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
+    "minify-all": "^1.2.2",
     "mongoose": "^5.3.3",
     "morgan": "~1.9.0",
+    "multer": "^1.4.1",
+    "node-dir": "^0.1.17",
+    "node-minify": "^3.6.0",
     "node-stream-zip": "^1.7.0",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "sanitize-html": "^1.19.1",
+    "vm2": "^3.6.4"
   }
 }
