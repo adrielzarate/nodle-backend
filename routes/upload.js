@@ -12,6 +12,8 @@ const Exercise = require('../models/Exercise');
 const concat = require('concat');
 const minifyAll = require("minify-all");
 const Extrator = require("html-extractor");
+const {VM} = require('vm2');
+const vm = new VM();
 // const multer  = require('multer');
 
 const rename = util.promisify(fs.rename);
@@ -210,6 +212,7 @@ router.use((req, res, next) => {
     const cssStyles = fs.readFileSync(`${finalRoute}/css/bundle.css`, "utf8");
     const bodyStartIndx = tempHTML.search('<body');
     const bodyEndStart = tempHTML.search('</body');
+    let vmJs = '';
 
     const bodyEndIndx = () => {
         const lastChunk = tempHTML.substring(bodyEndStart);
@@ -246,25 +249,43 @@ router.use((req, res, next) => {
         }
     );
 
-    const newHTML = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <style>
-            ${cssStyles}
-            </style>
-        </head>
-        ${cleanBody}
-        </html>
-    `;
+    function createHTML() {
 
-    fs.writeFile(`${finalRoute}/index.html`, newHTML, function(err) {
-        if(err) {
-            next(err);
-            return;
+        const newHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                ${cssStyles}
+                </style>
+                <script>${ vmJs }</script>
+            </head>
+                ${ cleanBody }
+            </html>
+        `;
+
+        fs.writeFile(`${finalRoute}/index.html`, newHTML, function(err) {
+            if(err) {
+                next(err);
+                return;
+            }
+            next();
+        });
+    }
+
+    fs.readFile(`${finalRoute}/js/bundle.js`, 'utf8', function(err, jsContent) {
+        try {
+            vm.run(jsContent);
+            vmJs = jsContent;
+        } catch (err) {
+            console.error('Failed to execute script.', err);
+            if(err) {
+                next(err);
+                return;
+            }
         }
-        next();
+        createHTML();
     });
 
 });
