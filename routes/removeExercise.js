@@ -6,7 +6,7 @@ router.delete('/:exerciseFolder', (req, res, next) => {
 
     const folderName = req.params.exerciseFolder;
     const publicFolder = `${__dirname}/../public/exercises/${folderName}`;
-    const exercisesFolder = `${__dirname}/../exercises/${folderName}`;
+    const exercisesView = `${__dirname}/../views/${folderName}.ejs`;
 
     new Promise(
         (resolve, reject) => {
@@ -16,7 +16,7 @@ router.delete('/:exerciseFolder', (req, res, next) => {
             });
         })
         .then(
-            rimraf(exercisesFolder, (err) => {
+            rimraf(exercisesView, (err) => {
                 if(err) throw new Error('Error deleting this file', err);
                 res.send('all removed');
             })
