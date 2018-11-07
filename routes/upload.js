@@ -14,36 +14,29 @@ const minifyAll = require("minify-all");
 const Extrator = require("html-extractor");
 const {VM} = require('vm2');
 const vm = new VM();
-// const multer  = require('multer');
 
 const rename = util.promisify(fs.rename);
 
-const routeExcercises = `${__dirname}/../exercises`;
-let tmpFolder = `${routeExcercises}/tmp`;
-let exerciseName = '';
-let tmpRoute = '';
-let finalRoute = '';
+const tempZipPath = `${__dirname}/../tempZip`;
+let viewsPath = `${__dirname}/../views`;
 
-// const upload = multer({ dest: tmpFolder });
+let exerciseName = '';
+let exercisesPublicPath = '';
+let exercisesUnzipPath = '';
 
 /**
-* Unzip in temp
+* Unzip
 */
 
 router.use((req, res, next) => {
 
-    if (!fs.existsSync(tmpFolder)){
-        fs.mkdirSync(tmpFolder);
-    }
-
     let exerciseFile = req.files.file;
-    let unzipFolderName = exerciseFile.name.split('.').slice(0, -1).join('.');
+    let uploadedZipFile = `${tempZipPath}/${exerciseFile.name}`;
+
     exerciseName = req.body.exerciseName.replace(/\s/g, '-').toLowerCase();
-
-    tmpRoute = `${routeExcercises}/tmp/${unzipFolderName}`;
-    finalRoute = `${routeExcercises}/${exerciseName}`;
-
-    let uploadedZipFile = `${routeExcercises}/tmp/${exerciseFile.name}`;
+    exercisesPublicPath = `${__dirname}/../public/exercises/${exerciseName}`;
+    exercisesUnzipName = exerciseFile.name.split('.').slice(0, -1).join('.');
+    exercisesUnzipPath = `${tempZipPath}/${exercisesUnzipName}`;
 
     exerciseFile.mv(uploadedZipFile, (err) => {
         if(err) {
@@ -57,12 +50,11 @@ router.use((req, res, next) => {
         });
 
         zip.on('ready', () => {
-            zip.extract(null, tmpFolder, (err) => {
+            zip.extract(null, tempZipPath, (err) => {
                 if(err) {
                     next(err);
                     return;
                 }
-
                 zip.close();
                 next();
             });
@@ -79,11 +71,11 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
 
     (async () => {
-        await mkdirp(finalRoute)
+        await mkdirp(exercisesPublicPath)
         await Promise.all([
-            mkdirp(`${finalRoute}/js`),
-            mkdirp(`${finalRoute}/css`),
-            mkdirp(`${finalRoute}/img`)
+            mkdirp(`${tempZipPath}/js`),
+            mkdirp(`${tempZipPath}/css`),
+            mkdirp(`${exercisesPublicPath}/img`)
         ]);
         next();
     })();
@@ -100,13 +92,9 @@ router.use((req, res, next) => {
         'info.json'
         ];
 
-    const publicDir = `${__dirname}/../public/exercises/${exerciseName}`;
-
-    fs.mkdirSync(publicDir);
-
     (async () => {
         await Promise.all(arrFiles.map(fileName => {
-            fs.rename(`${tmpRoute}/${fileName}`, `${publicDir}/${fileName}`, function (err) {
+            fs.rename(`${exercisesUnzipPath}/${fileName}`, `${exercisesPublicPath}/${fileName}`, function (err) {
                 if (err) throw err;
             });
         }));
@@ -115,13 +103,13 @@ router.use((req, res, next) => {
 });
 
 /**
-*  Moving images to the new directory
+*  Moving exercise images to the public directory
 */
 
 router.use((req, res, next) => {
     const arrImages = [];
 
-    dir.readFiles(`${tmpRoute}/img`,
+    dir.readFiles(`${exercisesUnzipPath}/img`,
         {
             match: /.(gif|jpg|jpeg|svg|png|webp)$/,
             exclude: /^\./,
@@ -136,7 +124,7 @@ router.use((req, res, next) => {
 
         (async () => {
             await Promise.all(arrImages.map(imageFile => {
-                fs.rename(`${tmpRoute}/img/${imageFile}`, `${finalRoute}/img/${imageFile}`, function (err) {
+                fs.rename(`${exercisesUnzipPath}/img/${imageFile}`, `${exercisesPublicPath}/img/${imageFile}`, function (err) {
                     if (err) throw err;
                 });
             }));
@@ -154,8 +142,8 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
     let promise = compressor.minify({
         compressor: 'uglifyjs',
-        input: `${tmpRoute}/js/**/*.js`,
-        output: `${finalRoute}/js/bundle.js`
+        input: `${exercisesUnzipPath}/js/**/*.js`,
+        output: `${tempZipPath}/js/bundle.js`
     });
     promise.then(function(min) {
         next();
@@ -170,13 +158,13 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
     let cssFiles = [];
 
-    dir.readFiles(`${tmpRoute}/css`, { match: /.css$/, exclude: /^\./ }, function(err, content, filename, next) {
+    dir.readFiles(`${exercisesUnzipPath}/css`, { match: /.css$/, exclude: /^\./ }, function(err, content, filename, next) {
         cssFiles.push(filename);
         next();
     },
     function(err, files){
         if (err) throw err;
-        concat(cssFiles, `${finalRoute}/css/bundle.css`).then( () => {
+        concat(cssFiles, `${tempZipPath}/css/bundle.css`).then( () => {
             next();
         });
     });
@@ -188,8 +176,8 @@ router.use((req, res, next) => {
 */
 
 router.use((req, res, next) => {
-    const tempHTML = fs.readFileSync(`${tmpRoute}/index.html`, "utf8");
-    const cssStyles = fs.readFileSync(`${finalRoute}/css/bundle.css`, "utf8");
+    const tempHTML = fs.readFileSync(`${exercisesUnzipPath}/index.html`, "utf8");
+    const cssStyles = fs.readFileSync(`${tempZipPath}/css/bundle.css`, "utf8");
     const bodyStartIndx = tempHTML.search('<body');
     const bodyEndStart = tempHTML.search('</body');
     let vmJs = '';
@@ -245,7 +233,7 @@ router.use((req, res, next) => {
             </html>
         `;
 
-        fs.writeFile(`${finalRoute}/index.html`, newHTML, function(err) {
+        fs.writeFile(`${viewsPath}/${exerciseName}.ejs`, newHTML, function(err) {
             if(err) {
                 next(err);
                 return;
@@ -254,14 +242,16 @@ router.use((req, res, next) => {
         });
     }
 
-    fs.readFile(`${finalRoute}/js/bundle.js`, 'utf8', function(err, jsContent) {
+    fs.readFile(`${tempZipPath}/js/bundle.js`, 'utf8', function(err, jsContent) {
         try {
             vm.run(jsContent);
             vmJs = jsContent;
-        } catch (err) {
-            console.error('Failed to execute script.', err);
-            if(err) {
-                next(err);
+        } catch (er) {
+            console.error('Failed to execute script.', er);
+            if(er) {
+                rimraf(exercisesPublicPath, (err) => console.log(err));
+                rimraf(`${tempZipPath}/*`, (err) => console.log(err));
+                next(er);
                 return;
             }
         }
@@ -282,13 +272,14 @@ router.post('/', (req, res, next) => {
             return;
         }
 
-        rimraf(tmpFolder, (err) => {
+        rimraf(`${tempZipPath}/*`, (err) => {
             if(err) {
                 next(err);
                 return;
             }
             res.send(data);
         });
+
     });
 
 });
