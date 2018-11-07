@@ -26,26 +26,6 @@ let finalRoute = '';
 
 // const upload = multer({ dest: tmpFolder });
 
-// router.use((req, res, next) => {
-    /* */
-    // rimraf(`${routeExcercises}/*`, (err) => {
-    //     if(err) {
-    //         next(err);
-    //         return;
-    //     }
-
-    //     rimraf(`${__dirname}/../public/exercises/*`, (err) => {
-    //         if(err) {
-    //             next(err);
-    //             return;
-    //         }
-    //         next();
-    //     });
-
-    // });
-    /* */
-// });
-
 /**
 * Unzip in temp
 */

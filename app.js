@@ -27,6 +27,7 @@ app.use('/',            require('./routes/index'));
 app.use('/users',       require('./routes/users'));
 app.use('/api/getList', require('./routes/api'));
 app.use('/upload',      require('./routes/upload'));
+app.use('/remove',      require('./routes/removeExercise'));
 app.use('/exercise',    require('./routes/exercise'));
 app.use('/api',         require('./routes/api'));
 
