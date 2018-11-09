@@ -1,8 +1,8 @@
 /node_modules
 
-/public/exercises/*
-/tempZip/*
-/views/*
+public/exercises/*
+tempZip/*
+views/*
 # testing
 /coverage
 
